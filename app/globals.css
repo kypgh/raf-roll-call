@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  background-color: #fff6ec;
+}
+
+body {
+  color: #241b2f;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background-color: #ffd0e4;
+  color: #241b2f;
+}
+
+:focus-visible {
+  outline: 2px solid #6b4eff;
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Shared text-field look: cream fill, soft border, purple focus ring. */
+  .rc-input {
+    @apply w-full box-border min-h-[48px] font-body text-base text-ink bg-offwhite border-2 border-line rounded-2xl px-3.5 outline-none transition-colors;
+  }
+  .rc-input:focus {
+    @apply border-purple bg-white;
+  }
+  textarea.rc-input {
+    @apply py-2.5 resize-none;
+  }
+
+  /* Same field look, used inside the violet "weekly classes" sub-panel. */
+  .rc-input-alt {
+    @apply w-full box-border min-h-[48px] font-body text-sm text-ink bg-white border-2 border-purple-light2 rounded-2xl px-2.5 outline-none transition-colors;
+  }
+
+  @keyframes rc-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+}
