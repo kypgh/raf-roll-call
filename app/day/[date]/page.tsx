@@ -50,10 +50,10 @@ export default async function DayPage({ params }: { params: { date: string } }) 
   return (
     <div className="bg-ink min-h-screen md:h-screen flex flex-col md:overflow-hidden">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] md:pt-6 pb-3 flex-none">
-        <span className="w-8 h-8 rounded-xl bg-purple flex items-center justify-center text-white text-base font-bold flex-none">
+        <span className="select-none w-8 h-8 rounded-xl bg-purple flex items-center justify-center text-white text-base font-bold flex-none">
           ✓
         </span>
-        <span className="font-display font-semibold text-xl text-paper flex-1 tracking-tight">Boo Boo</span>
+        <span className="select-none font-display font-semibold text-xl text-paper flex-1 tracking-tight">Boo Boo</span>
         {owedCount > 0 && (
           <Link
             href="/replace"

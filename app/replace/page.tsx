@@ -27,7 +27,7 @@ export default async function ReplacePage() {
           ‹
         </Link>
         <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-          <span className="font-display text-lg font-semibold text-paper">To replace</span>
+          <span className="select-none font-display text-lg font-semibold text-paper">To replace</span>
           <span className="text-xs text-[#8E8399]">
             {open.length === 0
               ? "All caught up"

@@ -58,10 +58,10 @@ export default function LoginPage() {
         >
           <div className="flex flex-col items-center gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-xl bg-purple shadow-[0_3px_0_#4A32C4] flex items-center justify-center text-white text-base font-bold">
+              <span className="select-none w-8 h-8 rounded-xl bg-purple shadow-[0_3px_0_#4A32C4] flex items-center justify-center text-white text-base font-bold">
                 ✓
               </span>
-              <span className="font-display font-semibold text-[28px] tracking-tight">
+              <span className="select-none font-display font-semibold text-[28px] tracking-tight">
                 Boo Boo
               </span>
             </div>
