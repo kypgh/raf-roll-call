@@ -51,7 +51,7 @@ export default async function HistoryPage({
   return (
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
-        <span className="font-display font-semibold text-xl flex-1">History</span>
+        <span className="font-display font-semibold text-xl text-paper flex-1">History</span>
         <Link
           href={`/day/${today}`}
           aria-label="Close"

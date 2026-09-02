@@ -22,7 +22,7 @@ export default async function RosterPage() {
   return (
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
-        <span className="font-display font-semibold text-xl flex-1">Roster</span>
+        <span className="font-display font-semibold text-xl text-paper flex-1">Roster</span>
         <Link
           href={`/day/${today}`}
           className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"

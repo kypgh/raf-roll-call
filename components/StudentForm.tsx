@@ -84,7 +84,7 @@ export default function StudentForm({
         >
           Cancel
         </Link>
-        <span className="font-display text-[17px] font-semibold">
+        <span className="font-display text-[17px] font-semibold text-paper">
           {studentId ? "Edit student" : "New student"}
         </span>
         <span className="flex-1" />

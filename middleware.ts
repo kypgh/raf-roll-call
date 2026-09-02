@@ -19,6 +19,11 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Run on everything except static assets.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Run on everything except static assets -- manifest.webmanifest and
+  // /icons are fetched by the OS/browser itself (e.g. installing the PWA
+  // icon) with no login session, so they must stay reachable unauthenticated
+  // just like favicon.ico already is.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icons/).*)",
+  ],
 };

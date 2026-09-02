@@ -17,24 +17,32 @@ export default async function ReplacePage() {
   });
 
   return (
-    <div className="max-w-[720px] mx-auto px-6 pt-6 pb-14 flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-display font-semibold text-[34px] leading-[1.1] tracking-tight m-0">
-            To replace
-          </h1>
-          <p className="m-0 text-sm text-muted">
+    <div className="bg-ink min-h-screen flex flex-col">
+      <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
+        <Link
+          href={`/day/${todayString()}`}
+          aria-label="Back"
+          className="no-underline w-9 h-9 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
+        >
+          ‹
+        </Link>
+        <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+          <span className="font-display text-lg font-semibold text-paper">To replace</span>
+          <span className="text-xs text-[#8E8399]">
             {open.length === 0
               ? "All caught up"
               : `${open.length} lesson${open.length === 1 ? "" : "s"} still to give back`}
-          </p>
+          </span>
         </div>
         {open.length > 0 && (
-          <span className="font-display text-sm font-semibold bg-gold-light text-gold-text rounded-full px-3 py-1.5">
+          <span className="font-display text-[15px] font-semibold text-ink bg-gold rounded-full min-w-[30px] h-[30px] flex items-center justify-center px-2 flex-none">
             {open.length}
           </span>
         )}
       </div>
+
+      <div className="flex-1 bg-paper rounded-t-[32px] px-[18px] md:px-7 pt-[18px] pb-14">
+      <div className="max-w-[640px] mx-auto flex flex-col gap-4">
 
       {open.length === 0 && resolved.length === 0 ? (
         <div className="border-2 border-dashed border-linesoft rounded-[26px] px-6 py-10 flex flex-col items-center gap-3 text-center">
@@ -95,12 +103,8 @@ export default async function ReplacePage() {
         </>
       )}
 
-      <Link
-        href={`/day/${todayString()}`}
-        className="no-underline self-center mt-1.5 text-sm font-semibold text-muted hover:text-purple"
-      >
-        ← Back to today
-      </Link>
+      </div>
+      </div>
     </div>
   );
 }

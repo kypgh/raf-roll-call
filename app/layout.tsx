@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fredoka, DM_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -17,6 +17,28 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "Roll Call",
   description: "Attendance tracker",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    // "default" keeps the status bar opaque instead of letting content run
+    // underneath it -- deliberately avoiding the edge-to-edge look so the
+    // phone keeps reserving safe space around the notch and status bar.
+    statusBarStyle: "default",
+    title: "Roll Call",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#241B2F",
+  // No viewportFit: "cover" -- that's what would push content under the
+  // notch/home-indicator. Leaving it out keeps the safe-area behavior
+  // identical to a normal browser tab.
 };
 
 export default function RootLayout({

@@ -53,7 +53,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
         <span className="w-8 h-8 rounded-xl bg-purple flex items-center justify-center text-white text-base font-bold flex-none">
           ✓
         </span>
-        <span className="font-display font-semibold text-xl flex-1 tracking-tight">Roll Call</span>
+        <span className="font-display font-semibold text-xl text-paper flex-1 tracking-tight">Roll Call</span>
         {owedCount > 0 && (
           <Link
             href="/replace"
