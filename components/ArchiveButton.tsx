@@ -23,7 +23,7 @@ export default function ArchiveButton({
       await archiveStudent(studentId);
       setPhase("done");
       setTimeout(() => {
-        router.push("/students");
+        router.push("/roster");
         router.refresh();
       }, 700);
     });
@@ -48,7 +48,7 @@ export default function ArchiveButton({
             Archive {studentName}?
           </span>
           <span className="text-sm text-red-text2">
-            They&rsquo;ll disappear from Week and the roster. Every past session and note is
+            They&rsquo;ll disappear from the rail and the roster. Every past session and note is
             preserved — you can bring them back any time.
           </span>
         </div>

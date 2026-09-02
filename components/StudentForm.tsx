@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addStudent, updateStudent, StudentInput, ScheduleInput } from "@/lib/actions";
 import { WEEKDAYS } from "@/lib/types";
+import LevelPicker from "@/components/LevelPicker";
 
 type Level = { id: number; name: string };
 
@@ -20,6 +21,7 @@ export default function StudentForm({
   initial?: Partial<StudentInput>;
 }) {
   const router = useRouter();
+  const [levelOptions, setLevelOptions] = useState(levels);
   const [form, setForm] = useState<StudentInput>({
     name: initial?.name ?? "",
     parent: initial?.parent ?? "",
@@ -68,28 +70,28 @@ export default function StudentForm({
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      router.push("/students");
+      router.push(studentId ? `/students/${studentId}` : "/roster");
       router.refresh();
     });
   }
 
   return (
-    <div className="max-w-[720px] mx-auto px-6 pt-6 pb-14 flex flex-col gap-4">
-      <Link
-        href="/students"
-        className="no-underline text-sm font-semibold text-muted self-start hover:text-purple"
-      >
-        ← Cancel
-      </Link>
-
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display font-semibold text-[34px] leading-[1.1] tracking-tight m-0">
-          {studentId ? `Edit ${studentName ?? "student"}` : "Add a student"}
-        </h1>
-        <p className="m-0 text-sm text-muted">
-          Name is all you need to start — the rest can wait.
-        </p>
+    <div className="bg-ink min-h-screen flex flex-col">
+      <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
+        <Link
+          href={studentId ? `/students/${studentId}` : "/roster"}
+          className="no-underline text-sm font-bold text-[#BBB0C6] hover:text-paper flex-1"
+        >
+          Cancel
+        </Link>
+        <span className="font-display text-[17px] font-semibold">
+          {studentId ? "Edit student" : "New student"}
+        </span>
+        <span className="flex-1" />
       </div>
+
+      <div className="flex-1 bg-paper rounded-t-[32px] px-[18px] md:px-7 pt-[18px] pb-14">
+      <div className="max-w-[640px] mx-auto flex flex-col gap-4">
 
       <form
         onSubmit={submit}
@@ -184,18 +186,15 @@ export default function StudentForm({
         </div>
 
         <Field label="Level">
-          <select
-            value={form.level_id}
-            onChange={(e) => set("level_id", e.target.value)}
-            className="rc-input"
-          >
-            <option value="">—</option>
-            {levels.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+          <LevelPicker
+            levels={levelOptions}
+            selectedId={form.level_id ? Number(form.level_id) : null}
+            onSelect={(id) => set("level_id", id != null ? String(id) : "")}
+            onLevelCreated={(l) => {
+              setLevelOptions((ls) => [...ls, l]);
+              set("level_id", String(l.id));
+            }}
+          />
         </Field>
 
         <Field label="Notes">
@@ -225,6 +224,9 @@ export default function StudentForm({
           {isPending ? "Saving…" : studentId ? "Save changes" : "Add student"}
         </button>
       </form>
+
+      </div>
+      </div>
     </div>
   );
 }

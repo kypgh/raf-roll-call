@@ -63,3 +63,25 @@ export function nextSevenDays(): string[] {
   const today = todayString();
   return Array.from({ length: 7 }, (_, i) => addDays(today, i));
 }
+
+// How many whole days `dateStr` is after today (negative = in the past).
+export function daysFromToday(dateStr: string): number {
+  const ms = parseDateOnly(dateStr).getTime() - parseDateOnly(todayString()).getTime();
+  return Math.round(ms / 86_400_000);
+}
+
+// "3 days ago" / "In 8 days" / "Yesterday" / "Tomorrow" -- used in Day Sheet
+// subtitles and owed-lesson rows.
+export function relativeDayLabel(dateStr: string): string {
+  const diff = daysFromToday(dateStr);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Tomorrow";
+  if (diff === -1) return "Yesterday";
+  return diff > 0 ? `In ${diff} days` : `${Math.abs(diff)} days ago`;
+}
+
+// Short label used for "Missed Jun 5" style copy in the owed list/profile.
+export function friendlyShortDate(dateStr: string): string {
+  const d = parseDateOnly(dateStr);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}

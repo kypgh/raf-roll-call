@@ -16,5 +16,16 @@ export function supabaseServer() {
 
   return createClient(url, key, {
     auth: { persistSession: false },
+    // Next.js patches the global `fetch` to cache responses (its Data
+    // Cache), and applies this to every fetch call -- including the ones
+    // supabase-js makes -- not just the ones you write yourself. Without
+    // this, `export const dynamic = "force-dynamic"` on a page is not
+    // enough to guarantee fresh data: a query can keep returning a stale,
+    // disk-persisted response from an earlier request with the same URL
+    // long after the underlying row has changed. Forcing `no-store` here
+    // makes every Supabase call fetched fresh, always.
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
   });
 }

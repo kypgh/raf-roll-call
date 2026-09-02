@@ -13,27 +13,26 @@ export default async function HistoryPage({
   searchParams: { before?: string };
 }) {
   const supabase = supabaseServer();
+  const today = todayString();
 
   let query = supabase
     .from("sessions")
-    .select("id, date, label")
+    .select("id, date")
     .order("date", { ascending: false })
     .limit(PAGE_SIZE);
 
-  query = searchParams.before
-    ? query.lt("date", searchParams.before)
-    : query.lte("date", todayString());
+  query = searchParams.before ? query.lt("date", searchParams.before) : query.lte("date", today);
 
   const { data: sessions } = await query;
-
   const sessionIds = (sessions ?? []).map((s) => s.id);
 
   const { data: attendance } =
     sessionIds.length > 0
       ? await supabase
           .from("attendance")
-          .select("id, session_id, status, confirmed, note, students(id, name)")
+          .select("id, session_id, status, note, students(id, name)")
           .in("session_id", sessionIds)
+          .not("status", "is", null)
       : { data: [] as any[] };
 
   const bySession = new Map<number, any[]>();
@@ -43,103 +42,90 @@ export default async function HistoryPage({
     bySession.set(row.session_id, list);
   }
   for (const list of bySession.values()) {
-    list.sort((a, b) =>
-      (a.students?.name ?? "").localeCompare(b.students?.name ?? "")
-    );
+    list.sort((a, b) => (a.students?.name ?? "").localeCompare(b.students?.name ?? ""));
   }
 
   const hasMore = (sessions ?? []).length === PAGE_SIZE;
-  const oldestDate =
-    sessions && sessions.length > 0 ? sessions[sessions.length - 1].date : null;
+  const oldestDate = sessions && sessions.length > 0 ? sessions[sessions.length - 1].date : null;
 
   return (
-    <div className="max-w-[720px] mx-auto px-6 pt-6 pb-14 flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display font-semibold text-[34px] leading-[1.1] tracking-tight m-0">
-          History
-        </h1>
-        <p className="m-0 text-sm text-muted">
-          Every past session, most recent first.
-        </p>
+    <div className="bg-ink min-h-screen flex flex-col">
+      <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
+        <span className="font-display font-semibold text-xl flex-1">History</span>
+        <Link
+          href={`/day/${today}`}
+          aria-label="Close"
+          className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
+        >
+          ✕
+        </Link>
       </div>
 
-      {!sessions || sessions.length === 0 ? (
-        <p className="text-sm text-muted">No sessions recorded yet.</p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {sessions.map((s) => {
-            const rows = bySession.get(s.id) ?? [];
-            return (
-              <div
-                key={s.id}
-                className="bg-white border-2 border-line rounded-[24px] shadow-[0_5px_0_#F3E6D8] p-5 flex flex-col gap-3"
-              >
-                <div className="flex items-center justify-between gap-2.5">
-                  <Link
-                    href={`/session/${s.date}`}
-                    className="no-underline font-display font-semibold text-[21px] text-ink hover:text-orange"
-                  >
-                    {friendlyDate(s.date)}
-                  </Link>
-                  <span className="text-[13px] font-bold text-muted bg-card2 rounded-full px-[11px] py-[5px]">
-                    {rows.length} {rows.length === 1 ? "student" : "students"}
-                  </span>
-                </div>
-
-                {rows.length === 0 ? (
-                  <p className="m-0 text-sm text-muted">No attendance recorded.</p>
-                ) : (
-                  <div className="flex flex-col gap-0.5">
-                    {rows.map((r, i) => {
-                      const style = STATUS_STYLE[r.status as keyof typeof STATUS_STYLE];
-                      return (
-                        <div
-                          key={r.id}
-                          className={`flex items-start gap-2.5 py-[9px] ${
-                            i > 0 ? "border-t-2 border-dashed border-line" : ""
-                          }`}
-                        >
-                          <span
-                            className="w-2.5 h-2.5 rounded-full mt-1.5 flex-none"
-                            style={{ background: style.dot }}
-                          />
-                          <div className="flex-1 flex flex-col gap-0.5">
-                            <span className="text-base font-semibold">
-                              {r.students?.name ?? "Unknown"}
-                            </span>
-                            {r.note ? (
-                              <span className="text-sm text-muted2">{r.note}</span>
-                            ) : !r.confirmed ? (
-                              <span className="text-xs font-bold text-faint bg-card2 rounded-full px-[9px] py-[3px] self-start">
-                                Unreviewed
-                              </span>
-                            ) : null}
-                          </div>
-                          <span
-                            className="text-[13px] font-bold flex-none"
-                            style={{ color: style.badgeText }}
-                          >
-                            {style.label}
-                          </span>
-                        </div>
-                      );
-                    })}
+      <div className="flex-1 bg-paper rounded-t-[32px] px-[18px] md:px-7 pt-[18px] pb-14">
+        <div className="max-w-[640px] mx-auto flex flex-col gap-4">
+          {!sessions || sessions.length === 0 ? (
+            <p className="text-sm text-muted">No sessions recorded yet.</p>
+          ) : (
+            sessions.map((s) => {
+              const rows = bySession.get(s.id) ?? [];
+              return (
+                <div
+                  key={s.id}
+                  className="bg-white border-2 border-line rounded-[22px] px-5 py-4 flex flex-col gap-3"
+                >
+                  <div className="flex items-center justify-between gap-2.5">
+                    <Link
+                      href={`/day/${s.date}`}
+                      className="no-underline font-display font-semibold text-[19px] text-ink hover:text-purple"
+                    >
+                      {friendlyDate(s.date)}
+                    </Link>
+                    <span className="text-[12px] font-bold text-muted bg-card2 rounded-full px-2.5 py-1">
+                      {rows.length} {rows.length === 1 ? "student" : "students"}
+                    </span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
 
-      {hasMore && oldestDate && (
-        <Link
-          href={`/history?before=${oldestDate}`}
-          className="no-underline self-center mt-1.5 min-h-[48px] flex items-center px-[22px] rounded-full bg-white border-2 border-line shadow-[0_4px_0_#F3E6D8] text-ink text-[15px] font-bold hover:border-orange hover:text-orange active:translate-y-[3px] active:shadow-[0_1px_0_#F3E6D8]"
-        >
-          Load older sessions →
-        </Link>
-      )}
+                  {rows.length === 0 ? (
+                    <p className="m-0 text-sm text-muted">No attendance recorded.</p>
+                  ) : (
+                    <div className="flex flex-col gap-0.5">
+                      {rows.map((r, i) => {
+                        const style = STATUS_STYLE[r.status as keyof typeof STATUS_STYLE];
+                        return (
+                          <div
+                            key={r.id}
+                            className={`flex items-start gap-2.5 py-2 ${
+                              i > 0 ? "border-t-2 border-dashed border-line" : ""
+                            }`}
+                          >
+                            <span className="w-2 h-2 rounded-full mt-1.5 flex-none" style={{ background: style.dot }} />
+                            <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                              <span className="text-[15px] font-semibold">{r.students?.name ?? "Unknown"}</span>
+                              {r.note && <span className="text-[13px] text-muted2">{r.note}</span>}
+                            </div>
+                            <span className="text-[12px] font-bold flex-none" style={{ color: style.badgeText }}>
+                              {style.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+
+          {hasMore && oldestDate && (
+            <Link
+              href={`/history?before=${oldestDate}`}
+              className="no-underline self-center mt-1.5 min-h-[48px] flex items-center px-[22px] rounded-full bg-white border-2 border-line text-ink text-[15px] font-bold hover:border-purple hover:text-purple"
+            >
+              Load older sessions →
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

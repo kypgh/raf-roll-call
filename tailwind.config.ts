@@ -10,14 +10,19 @@ const config: Config = {
       colors: {
         paper: "#FFF6EC",
         ink: "#241B2F",
+        "ink-deep": "#0F0A17",
         line: "#F3E6D8",
         linesoft: "#EFE2D4",
+        linedash: "#E0D3C4",
+        rule: "#F6EFE6",
         muted: "#7C7089",
         muted2: "#5B5168",
         faint: "#8A7E98",
         faint2: "#A299AC",
         offwhite: "#FDF8F2",
         card2: "#FBF5EE",
+        "rail-muted": "#8E8399",
+        "rail-lit": "#D5CCE0",
 
         purple: "#6B4EFF",
         "purple-dark": "#4A32C4",
@@ -41,9 +46,13 @@ const config: Config = {
         "orange-soft": "#FFE0B8",
 
         gold: "#FFB020",
+        "gold-hover": "#FFC24D",
         "gold-dark": "#C07C00",
         "gold-light": "#FFF4DF",
+        "gold-soft": "#FFF9EF",
+        "gold-border": "#FFE1AC",
         "gold-text": "#8A5A00",
+        "gold-text2": "#5B3A00",
 
         sky: "#12B5E5",
         "sky-dark": "#0A7EA0",
@@ -56,6 +65,7 @@ const config: Config = {
         "green-darker": "#0B7A45",
         "green-light": "#E6FAF0",
         "green-border": "#A6EBC8",
+        "green-border2": "#CBEEDC",
         "green-soft": "#D8F5E6",
 
         red: "#FF4B55",
@@ -64,6 +74,7 @@ const config: Config = {
         "red-text": "#A81C25",
         "red-text2": "#7A3037",
         "red-border": "#FFC9CC",
+        "red-border2": "#FFD3D6",
       },
       fontFamily: {
         display: ["var(--font-display)", "Fredoka", "ui-sans-serif", "sans-serif"],

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, DM_Sans } from "next/font/google";
 import "./globals.css";
-import Nav from "@/components/Nav";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -27,10 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${fredoka.variable} ${dmSans.variable}`}>
-      <body className="bg-paper min-h-screen font-body text-ink">
-        <Nav />
-        {children}
-      </body>
+      <body className="bg-ink min-h-screen font-body text-ink">{children}</body>
     </html>
   );
 }

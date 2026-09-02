@@ -48,32 +48,20 @@ export function levelColor(id: number | null | undefined) {
   return LEVEL_PALETTE[hashSeed(id) % LEVEL_PALETTE.length];
 }
 
+// Amber ("gold") used to mean "late"; it now means "teacher was out / lesson
+// owed" -- it keeps its slot in the palette so nothing needs relearning.
 export const STATUS_STYLE: Record<
   AttendanceStatus,
   { label: string; on: string; onFg: string; dot: string; badgeBg: string; badgeText: string }
 > = {
   present: { label: "Present", on: "#17C26B", onFg: "#FFFFFF", dot: "#17C26B", badgeBg: "#E6FAF0", badgeText: "#0B7A45" },
-  absent: { label: "Absent", on: "#FF4B55", onFg: "#FFFFFF", dot: "#FF4B55", badgeBg: "#FFF0F0", badgeText: "#A81C25" },
-  late: { label: "Late", on: "#FFB020", onFg: "#241B2F", dot: "#FFB020", badgeBg: "#FFF4DF", badgeText: "#8A5A00" },
+  absent: { label: "Away", on: "#FF4B55", onFg: "#FFFFFF", dot: "#FF4B55", badgeBg: "#FFF0F0", badgeText: "#A81C25" },
+  teacher_absent: { label: "I was out", on: "#FFB020", onFg: "#241B2F", dot: "#FFB020", badgeBg: "#FFF4DF", badgeText: "#8A5A00" },
 };
 
 export const NAV_ACCENT: Record<string, string> = {
-  Week: "#6B4EFF",
+  Day: "#6B4EFF",
   Students: "#FF4FA3",
   Levels: "#12B5E5",
-  History: "#FF7A45",
+  Replace: "#FFB020",
 };
-
-// Per-weekday accent used on Week day cards (index = Date#getDay(), 0=Sunday).
-const DAY_STYLE = [
-  { accent: "#C05CFF", pillBg: "#F5E9FF", pillText: "#7A3FA0" }, // Sun
-  { accent: "#6B4EFF", pillBg: "#F2EEFF", pillText: "#3A21C7" }, // Mon
-  { accent: "#FF4FA3", pillBg: "#FFEFF7", pillText: "#B8146A" }, // Tue
-  { accent: "#12B5E5", pillBg: "#E4F7FD", pillText: "#0A6E8C" }, // Wed
-  { accent: "#17C26B", pillBg: "#E6FAF0", pillText: "#0B7A45" }, // Thu
-  { accent: "#FFB020", pillBg: "#FFF4DF", pillText: "#8A5A00" }, // Fri
-  { accent: "#FF7A45", pillBg: "#FFF0E8", pillText: "#A03A0F" }, // Sat
-];
-export function dayStyle(weekdayIndex: number) {
-  return DAY_STYLE[weekdayIndex % DAY_STYLE.length];
-}
