@@ -62,7 +62,7 @@ export default function LoginPage() {
                 ✓
               </span>
               <span className="font-display font-semibold text-[28px] tracking-tight">
-                Roll Call
+                Boo Boo
               </span>
             </div>
             <p className="m-0 text-sm text-muted">Enter your code to continue</p>

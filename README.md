@@ -1,6 +1,6 @@
-# Roll Call — attendance tracker
+# Boo Boo — attendance tracker
 
-A tiny personal tool: manage your student roster, take attendance session by
+A tiny personal tool: manage your student team, take attendance session by
 session, and keep notes and history per student. No accounts, just a single
 passcode gate.
 
@@ -57,7 +57,7 @@ student have more than one weekly class.
 
 ## 6. Importing an existing student list
 
-If you have a roster in a spreadsheet, `scripts/generate_import.py` shows
+If you have a team list in a spreadsheet, `scripts/generate_import.py` shows
 the pattern used to turn a CSV into a safe SQL import: normalize phone
 numbers, map old level names onto your Levels table, merge duplicate rows
 that are really the same student with two weekly classes, and skip blank
@@ -76,7 +76,7 @@ SQL editor.
   moment you touch it, so at a glance you can see who you haven't actually
   looked at yet, even though everyone defaults to Present.
 - **Students** — add/edit/archive students. Archiving hides them from Week
-  and the roster without deleting their history.
+  and the team without deleting their history.
 - **Levels** — a plain, editable table, not hardcoded — add new ones any
   time from the Levels page.
 - **History** — each student's profile lists every past session, status, and

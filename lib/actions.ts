@@ -630,18 +630,15 @@ export async function getDeckQueue(dateStr: string): Promise<DeckMember[]> {
   const supabase = supabaseServer();
   const weekday = weekdayOf(dateStr);
 
-  const { data: schedules } = await supabase
-    .from("student_schedules")
-    .select("student_id, time, students!inner(id, name, archived)")
-    .eq("day", weekday)
-    .eq("students.archived", false)
-    .order("time", { ascending: true });
-
-  const { data: session } = await supabase
-    .from("sessions")
-    .select("id")
-    .eq("date", dateStr)
-    .maybeSingle();
+  const [{ data: schedules }, { data: session }] = await Promise.all([
+    supabase
+      .from("student_schedules")
+      .select("student_id, time, students!inner(id, name, archived)")
+      .eq("day", weekday)
+      .eq("students.archived", false)
+      .order("time", { ascending: true }),
+    supabase.from("sessions").select("id").eq("date", dateStr).maybeSingle(),
+  ]);
 
   const { data: attendance } = session
     ? await supabase

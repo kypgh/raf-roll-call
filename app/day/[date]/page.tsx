@@ -53,7 +53,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
         <span className="w-8 h-8 rounded-xl bg-purple flex items-center justify-center text-white text-base font-bold flex-none">
           ✓
         </span>
-        <span className="font-display font-semibold text-xl text-paper flex-1 tracking-tight">Roll Call</span>
+        <span className="font-display font-semibold text-xl text-paper flex-1 tracking-tight">Boo Boo</span>
         {owedCount > 0 && (
           <Link
             href="/replace"
@@ -66,7 +66,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
           </Link>
         )}
         <Link
-          href="/roster"
+          href="/team"
           className="flex items-center gap-2 no-underline bg-[rgba(255,246,236,.08)] border-[1.5px] border-[rgba(255,246,236,.16)] hover:bg-[rgba(255,246,236,.14)] rounded-full pl-2.5 pr-3.5 py-2 flex-none transition-colors"
         >
           <span className="flex">
@@ -74,7 +74,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
             <span className="w-[22px] h-[22px] rounded-full bg-sky border-2 border-ink -ml-2.5" />
             <span className="w-[22px] h-[22px] rounded-full bg-green border-2 border-ink -ml-2.5" />
           </span>
-          <span className="text-[13px] font-bold text-[#E4DDEC]">Roster</span>
+          <span className="text-[13px] font-bold text-[#E4DDEC]">Team</span>
         </Link>
         <Link
           href="/history"

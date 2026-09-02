@@ -14,7 +14,7 @@ type Student = {
 };
 type Level = { id: number; name: string };
 
-export default function RosterList({
+export default function TeamList({
   students,
   levels,
   todayWeekday,

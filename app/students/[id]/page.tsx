@@ -18,32 +18,33 @@ export default async function StudentProfilePage({
   const id = Number(params.id);
   const supabase = supabaseServer();
 
-  const [{ data: student }, { data: levels }] = await Promise.all([
-    supabase
-      .from("students")
-      .select("*, student_schedules(day, time)")
-      .eq("id", id)
-      .maybeSingle(),
-    supabase.from("levels").select("id, name").order("sort_order", { ascending: true }),
-  ]);
-
-  if (!student) notFound();
-
   // Only answered sessions count as history -- a drop-in added but never
   // marked isn't an outcome worth showing.
-  const { data: history } = await supabase
-    .from("attendance")
-    .select("id, status, note, sessions(date)")
-    .eq("student_id", id)
-    .not("status", "is", null)
-    .order("id", { ascending: false });
+  const [{ data: student }, { data: levels }, { data: history }, openMakeupsByStudent] =
+    await Promise.all([
+      supabase
+        .from("students")
+        .select("*, student_schedules(day, time)")
+        .eq("id", id)
+        .maybeSingle(),
+      supabase.from("levels").select("id, name").order("sort_order", { ascending: true }),
+      supabase
+        .from("attendance")
+        .select("id, status, note, sessions(date)")
+        .eq("student_id", id)
+        .not("status", "is", null)
+        .order("id", { ascending: false }),
+      getOpenMakeupsByStudent([id]),
+    ]);
+
+  if (!student) notFound();
 
   const sorted = (history ?? []).slice().sort((a: any, b: any) =>
     (b.sessions?.date ?? "").localeCompare(a.sessions?.date ?? "")
   );
 
   const av = avatarColor(student.id);
-  const openMakeup = (await getOpenMakeupsByStudent([id])).get(id) ?? null;
+  const openMakeup = openMakeupsByStudent.get(id) ?? null;
 
   const totalSessions = sorted.length;
   const presentCount = sorted.filter((h: any) => h.status === "present").length;
@@ -56,10 +57,10 @@ export default async function StudentProfilePage({
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
         <Link
-          href="/roster"
+          href="/team"
           className="no-underline text-sm font-bold text-[#BBB0C6] hover:text-paper flex-1"
         >
-          ← Roster
+          ← Team
         </Link>
         <Link
           href={`/students/${id}/edit`}

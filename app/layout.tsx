@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka, DM_Sans } from "next/font/google";
+import { Suspense } from "react";
+import RouteProgress from "@/components/RouteProgress";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -15,7 +17,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Roll Call",
+  title: "Boo Boo",
   description: "Attendance tracker",
   icons: {
     icon: [
@@ -30,7 +32,7 @@ export const metadata: Metadata = {
     // underneath it -- deliberately avoiding the edge-to-edge look so the
     // phone keeps reserving safe space around the notch and status bar.
     statusBarStyle: "default",
-    title: "Roll Call",
+    title: "Boo Boo",
   },
 };
 
@@ -48,7 +50,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${fredoka.variable} ${dmSans.variable}`}>
-      <body className="bg-ink min-h-screen font-body text-ink">{children}</body>
+      <body className="bg-ink min-h-screen font-body text-ink">
+        <Suspense fallback={null}>
+          <RouteProgress />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }

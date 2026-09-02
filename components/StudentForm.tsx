@@ -70,7 +70,7 @@ export default function StudentForm({
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      router.push(studentId ? `/students/${studentId}` : "/roster");
+      router.push(studentId ? `/students/${studentId}` : "/team");
       router.refresh();
     });
   }
@@ -79,7 +79,7 @@ export default function StudentForm({
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
         <Link
-          href={studentId ? `/students/${studentId}` : "/roster"}
+          href={studentId ? `/students/${studentId}` : "/team"}
           className="no-underline text-sm font-bold text-[#BBB0C6] hover:text-paper flex-1"
         >
           Cancel
