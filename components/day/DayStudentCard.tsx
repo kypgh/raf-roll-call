@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { updateAttendance } from "@/lib/actions";
 import { AttendanceStatus } from "@/lib/types";
 import { avatarColor, initials } from "@/lib/colors";
@@ -50,18 +51,23 @@ export default function DayStudentCard({
       style={{ border: `2px solid ${open ? "#6B4EFF" : "#F3E6D8"}` }}
     >
       <div className="flex items-center gap-3">
-        <span
-          className="w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
-          style={{ background: av.bg, color: av.fg }}
+        <Link
+          href={`/students/${studentId}`}
+          className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
         >
-          {initials(studentName)}
-        </span>
-        <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-          <span className="text-[16px] font-bold truncate">{studentName}</span>
-          <span className="text-[12px] font-semibold text-muted">
-            {isDropIn ? "Drop-in" : friendlyTime(time)}
+          <span
+            className="select-none w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
+            style={{ background: av.bg, color: av.fg }}
+          >
+            {initials(studentName)}
           </span>
-        </div>
+          <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+            <span className="select-none text-[16px] font-bold truncate">{studentName}</span>
+            <span className="select-none text-[12px] font-semibold text-muted">
+              {isDropIn ? "Drop-in" : friendlyTime(time)}
+            </span>
+          </div>
+        </Link>
         <StatusDisc status={current} onClick={() => setOpen((o) => !o)} />
       </div>
 

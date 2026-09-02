@@ -183,21 +183,26 @@ function StudentAvatarRow({
       }}
     >
       <div className="flex items-center gap-3">
-        <span
-          className="w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
-          style={{ background: av.bg, color: av.fg, opacity: dimmed ? 0.5 : 1 }}
+        <Link
+          href={`/students/${studentId}`}
+          className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
         >
-          {initials(studentName)}
-        </span>
-        <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-          <span className="text-[16px] font-bold truncate">{studentName}</span>
           <span
-            className="text-[12px] font-semibold"
-            style={{ color: subtitleColor ?? (dimmed ? "#A299AC" : "#7C7089") }}
+            className="select-none w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
+            style={{ background: av.bg, color: av.fg, opacity: dimmed ? 0.5 : 1 }}
           >
-            {subtitle ?? (dimmed ? "Not marked" : time ? friendlyTime(time) : "Drop-in")}
+            {initials(studentName)}
           </span>
-        </div>
+          <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+            <span className="select-none text-[16px] font-bold truncate">{studentName}</span>
+            <span
+              className="select-none text-[12px] font-semibold"
+              style={{ color: subtitleColor ?? (dimmed ? "#A299AC" : "#7C7089") }}
+            >
+              {subtitle ?? (dimmed ? "Not marked" : time ? friendlyTime(time) : "Drop-in")}
+            </span>
+          </div>
+        </Link>
         {right}
       </div>
       {children}
