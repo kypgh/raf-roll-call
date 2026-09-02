@@ -53,7 +53,7 @@ export default function DropInPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex-1 min-h-[46px] bg-white border-2 border-line rounded-2xl font-body text-[14px] font-bold text-ink cursor-pointer hover:border-purple hover:text-purple transition-colors px-4"
+        className="w-full sm:w-auto sm:flex-1 min-h-[46px] bg-white border-2 border-line rounded-2xl font-body text-[14px] font-bold text-ink cursor-pointer hover:border-purple hover:text-purple transition-colors px-4"
       >
         {label}
       </button>

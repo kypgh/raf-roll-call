@@ -291,7 +291,7 @@ function TodayMode({
         ))}
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
         <DropInPicker date={date} candidates={candidates} />
         <ImOutTodayButton date={date} count={total} />
       </div>
@@ -553,7 +553,7 @@ function FutureMode({
 
       <div className="border-2 border-dashed border-linesoft rounded-2xl px-4 py-4 flex flex-col gap-2.5">
         <span className="text-[11px] font-bold uppercase tracking-[.07em] text-faint2">Get ahead of it</span>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
           <DropInPicker date={date} candidates={candidates} label="＋ Add a one-off" />
           <MarkAwayPicker date={date} candidates={allScheduled} />
           <ImOutTodayButton date={date} count={rows.length} />

@@ -47,7 +47,7 @@ export function ImOutTodayButton({ date, count }: { date: string; count: number 
     <button
       type="button"
       onClick={() => setConfirming(true)}
-      className="flex-1 min-h-[46px] bg-gold-light border-2 border-gold-border text-gold-text rounded-2xl font-body text-[14px] font-bold cursor-pointer hover:border-gold transition-colors px-4"
+      className="w-full sm:w-auto sm:flex-1 min-h-[46px] bg-gold-light border-2 border-gold-border text-gold-text rounded-2xl font-body text-[14px] font-bold cursor-pointer hover:border-gold transition-colors px-4"
     >
       I&rsquo;m out today
     </button>

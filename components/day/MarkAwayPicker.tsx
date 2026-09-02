@@ -35,7 +35,7 @@ export default function MarkAwayPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="min-h-[42px] bg-red-light border-2 border-red-border2 text-red-text rounded-full font-body text-[13px] font-bold cursor-pointer hover:border-red transition-colors px-4"
+        className="w-full sm:w-auto min-h-[42px] bg-red-light border-2 border-red-border2 text-red-text rounded-full font-body text-[13px] font-bold cursor-pointer hover:border-red transition-colors px-4"
       >
         Mark someone away
       </button>
