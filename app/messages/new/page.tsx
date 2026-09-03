@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { loadDaySheet } from "@/lib/actions";
 import { friendlyDate, friendlyTime } from "@/lib/dates";
 import MessageComposer, { ComposerCandidate } from "@/components/messages/MessageComposer";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,13 @@ export default async function NewMessagePage({
         <span className="select-none font-display font-semibold text-xl text-paper flex-1">
           New message
         </span>
+        <Link
+          href="/messages/last"
+          aria-label="Last message sent"
+          className="flex items-center justify-center no-underline w-10 h-10 rounded-full bg-green/10 border-2 border-green/30 hover:bg-green/20 flex-none transition-colors text-green"
+        >
+          <WhatsAppIcon className="w-[15px] h-[15px]" />
+        </Link>
         <Link
           href={backHref}
           className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] border-2 border-[rgba(255,246,236,.4)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"

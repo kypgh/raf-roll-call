@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { todayString, weekdayOf } from "@/lib/dates";
 import TeamList from "@/components/TeamList";
 import ExportTeamButton from "@/components/ExportTeamButton";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,13 @@ export default async function TeamPage() {
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
         <span className="select-none font-display font-semibold text-xl text-paper flex-1">Team</span>
         <ExportTeamButton students={students ?? []} levels={levels ?? []} />
+        <Link
+          href="/messages/last"
+          aria-label="Last message sent"
+          className="flex items-center justify-center no-underline w-10 h-10 rounded-full bg-green/10 border-2 border-green/30 hover:bg-green/20 flex-none transition-colors text-green"
+        >
+          <WhatsAppIcon className="w-[15px] h-[15px]" />
+        </Link>
         <Link
           href={`/day/${today}`}
           className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] border-2 border-[rgba(255,246,236,.4)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
