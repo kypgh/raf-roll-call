@@ -129,18 +129,26 @@ export default function TeamList({
         <span className="text-[11px] font-bold tracking-[.1em] uppercase text-faint2 px-0.5">
           {todayList.length > 0 ? "Today" : "All students"}
         </span>
-        <button
-          type="button"
-          onClick={toggleSelectMode}
-          className="text-xs font-bold rounded-full px-3.5 py-1.5 cursor-pointer border-2"
-          style={{
-            background: selectMode ? "#241B2F" : "#FFFFFF",
-            color: selectMode ? "#FFFFFF" : "#5B5168",
-            borderColor: selectMode ? "#241B2F" : "#F3E6D8",
-          }}
-        >
-          {selectMode ? "Cancel" : "Select"}
-        </button>
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/messages/last"
+            className="no-underline text-xs font-bold text-green-darker"
+          >
+            View last message
+          </Link>
+          <button
+            type="button"
+            onClick={toggleSelectMode}
+            className="text-xs font-bold rounded-full px-3.5 py-1.5 cursor-pointer border-2"
+            style={{
+              background: selectMode ? "#241B2F" : "#FFFFFF",
+              color: selectMode ? "#FFFFFF" : "#5B5168",
+              borderColor: selectMode ? "#241B2F" : "#F3E6D8",
+            }}
+          >
+            {selectMode ? "Cancel" : "Select"}
+          </button>
+        </div>
       </div>
 
       {selectMode && (
