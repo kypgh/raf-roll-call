@@ -8,6 +8,7 @@ import { avatarColor, initials } from "@/lib/colors";
 import { friendlyTime } from "@/lib/dates";
 import StatusDisc from "./StatusDisc";
 import NoteField from "@/components/NoteField";
+import RemoveDropInButton from "./RemoveDropInButton";
 
 const EDIT_OPTIONS: { status: AttendanceStatus; label: string; border: string; on: string; onFg: string }[] = [
   { status: "present", label: "Present", border: "#CBEEDC", on: "#17C26B", onFg: "#FFFFFF" },
@@ -85,6 +86,7 @@ export default function DayStudentCard({
           </div>
         </Link>
         <StatusDisc status={current} onClick={() => setOpen((o) => !o)} />
+        {isDropIn && id && <RemoveDropInButton attendanceId={id} />}
       </div>
 
       <NoteField initialNote={note} onSave={saveNote} />

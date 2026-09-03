@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "./supabase";
 import { todayString, weekdayOf } from "./dates";
-import { AttendanceStatus, Weekday, isAnswered } from "./types";
+import { AttendanceStatus, MessageBatch, Weekday, isAnswered } from "./types";
 
 // This is a tiny single-user app -- there's no meaningful cost to
 // over-invalidating, but under-invalidating means some page quietly shows
@@ -752,4 +752,75 @@ export async function getFullHistoryExport(): Promise<HistoryExportRow[]> {
     }
   }
   return rows;
+}
+
+// ---------- WhatsApp message batches ----------
+
+export type MessageRecipientInput = {
+  studentId: number;
+  name: string;
+  parent: string | null;
+  phone: string | null;
+  message: string;
+};
+
+// Only ever one row (id = 1) -- a new batch overwrites the last one rather
+// than appending, since the app only ever needs to recover "what I was just
+// sending", not a history of every batch composed.
+export async function saveMessageBatch(
+  template: string,
+  source: string | null,
+  recipients: MessageRecipientInput[]
+) {
+  const supabase = supabaseServer();
+  const { error } = await supabase.from("message_batches").upsert(
+    {
+      id: 1,
+      created_at: new Date().toISOString(),
+      template,
+      source,
+      recipients: recipients.map((r) => ({ ...r, sent: false, sentAt: null })),
+    },
+    { onConflict: "id" }
+  );
+  if (error) return { ok: false, error: error.message };
+  revalidateAll();
+  return { ok: true };
+}
+
+export async function getLastMessageBatch(): Promise<MessageBatch | null> {
+  const supabase = supabaseServer();
+  const { data } = await supabase
+    .from("message_batches")
+    .select("created_at, template, source, recipients")
+    .eq("id", 1)
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    createdAt: data.created_at,
+    template: data.template,
+    source: data.source,
+    recipients: (data.recipients ?? []) as MessageBatch["recipients"],
+  };
+}
+
+// Ticked by hand after actually hitting send in WhatsApp -- there's no way
+// to know a wa.me tap turned into a real send, so this just tracks "I've
+// dealt with this one" as staff work through the list.
+export async function markMessageRecipientSent(studentId: number) {
+  const supabase = supabaseServer();
+  const { data } = await supabase
+    .from("message_batches")
+    .select("recipients")
+    .eq("id", 1)
+    .maybeSingle();
+  if (!data) return { ok: false, error: "No message batch to update." };
+
+  const recipients = (data.recipients as any[]).map((r) =>
+    r.studentId === studentId ? { ...r, sent: true, sentAt: new Date().toISOString() } : r
+  );
+  const { error } = await supabase.from("message_batches").update({ recipients }).eq("id", 1);
+  if (error) return { ok: false, error: error.message };
+  revalidateAll();
+  return { ok: true };
 }

@@ -20,6 +20,7 @@ import { OwedRowBanner, TeacherOutHero } from "@/components/day/OwedBanner";
 import { ImOutTodayButton, WasntOutAfterAllButton } from "@/components/day/TeacherOutActions";
 import DropInPicker from "@/components/day/DropInPicker";
 import MarkAwayPicker from "@/components/day/MarkAwayPicker";
+import RemoveDropInButton from "@/components/day/RemoveDropInButton";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,15 @@ export default async function DayPage({ params }: { params: { date: string } }) 
           </span>
           <span className="text-[13px] font-bold text-[#E4DDEC]">Team</span>
         </Link>
+        {day.total > 0 && (
+          <Link
+            href={`/messages/new?date=${dateStr}`}
+            aria-label="Message today's students"
+            className="flex items-center justify-center no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] border-2 border-[rgba(255,246,236,.4)] hover:bg-[rgba(255,246,236,.16)] flex-none transition-colors text-[#E4DDEC]"
+          >
+            <WhatsAppIcon />
+          </Link>
+        )}
         <Link
           href="/history"
           aria-label="History"
@@ -107,10 +117,17 @@ export default async function DayPage({ params }: { params: { date: string } }) 
               />
             )}
             {day.mode === "partial" && (
-              <PartialMode date={dateStr} answeredCount={day.answeredCount} total={day.total} rows={day.rows} />
+              <PartialMode
+                date={dateStr}
+                isToday={dateStr === today}
+                answeredCount={day.answeredCount}
+                total={day.total}
+                rows={day.rows}
+                candidates={dropInCandidates}
+              />
             )}
             {day.mode === "past" && (
-              <PastMode date={dateStr} day={day} />
+              <PastMode date={dateStr} isToday={dateStr === today} day={day} candidates={dropInCandidates} />
             )}
             {day.mode === "teacherout" && <TeacherOutMode date={dateStr} day={day} />}
             {day.mode === "future" && (
@@ -124,6 +141,15 @@ export default async function DayPage({ params }: { params: { date: string } }) 
         </div>
       </div>
     </div>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[15px] h-[15px]">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+      <path d="M12.031 0h-.043C5.371 0 0 5.383 0 12c0 2.625.847 5.058 2.286 7.037L.849 23.15l4.245-1.361c1.9 1.256 4.176 1.988 6.937 1.988 6.617 0 12-5.383 12-12s-5.383-12-12-12zm0 21.995a9.933 9.933 0 0 1-5.343-1.554l-.383-.228-3.155 1.012 1.012-3.078-.25-.316A9.936 9.936 0 0 1 2.031 12c0-5.514 4.487-10 10-10s10 4.486 10 10-4.487 9.995-10 9.995z" />
+    </svg>
   );
 }
 
@@ -250,7 +276,13 @@ function TodayMode({
   isToday: boolean;
   total: number;
   timeRange: string | null;
-  rows: { studentId: number; studentName: string; time: string | null }[];
+  rows: {
+    attendanceId: number | null;
+    studentId: number;
+    studentName: string;
+    time: string | null;
+    isDropIn: boolean;
+  }[];
   candidates: { id: number; name: string }[];
 }) {
   const seconds = Math.max(10, total * 7);
@@ -292,14 +324,23 @@ function TodayMode({
             studentName={r.studentName}
             time={r.time}
             date={date}
-            right={<span className="w-[30px] h-[30px] rounded-full border-2 border-dashed border-linedash flex-none" />}
+            right={
+              r.isDropIn && r.attendanceId ? (
+                <RemoveDropInButton attendanceId={r.attendanceId} />
+              ) : (
+                <span className="w-[30px] h-[30px] rounded-full border-2 border-dashed border-linedash flex-none" />
+              )
+            }
           />
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
-        <DropInPicker date={date} candidates={candidates} />
-        <ImOutTodayButton date={date} count={total} />
+      <div className="border-2 border-dashed border-linesoft rounded-2xl px-4 py-4 flex flex-col gap-2.5">
+        <span className="text-[11px] font-bold uppercase tracking-[.07em] text-faint2">Get ahead of it</span>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+          <DropInPicker date={date} candidates={candidates} />
+          <ImOutTodayButton date={date} count={total} />
+        </div>
       </div>
     </>
   );
@@ -309,11 +350,14 @@ function TodayMode({
 
 function PartialMode({
   date,
+  isToday,
   answeredCount,
   total,
   rows,
+  candidates,
 }: {
   date: string;
+  isToday: boolean;
   answeredCount: number;
   total: number;
   rows: {
@@ -325,6 +369,7 @@ function PartialMode({
     note: string | null;
     isDropIn: boolean;
   }[];
+  candidates: { id: number; name: string }[];
 }) {
   const remaining = total - answeredCount;
   return (
@@ -366,6 +411,15 @@ function PartialMode({
           />
         ))}
       </div>
+
+      {isToday && (
+        <div className="border-2 border-dashed border-linesoft rounded-2xl px-4 py-4 flex flex-col gap-2.5">
+          <span className="text-[11px] font-bold uppercase tracking-[.07em] text-faint2">Get ahead of it</span>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+            <DropInPicker date={date} candidates={candidates} />
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -374,10 +428,14 @@ function PartialMode({
 
 function PastMode({
   date,
+  isToday,
   day,
+  candidates,
 }: {
   date: string;
+  isToday: boolean;
   day: Awaited<ReturnType<typeof loadDaySheet>>;
+  candidates: { id: number; name: string }[];
 }) {
   return (
     <>
@@ -414,6 +472,15 @@ function PastMode({
           ) : null;
         })}
       </div>
+
+      {isToday && (
+        <div className="border-2 border-dashed border-linesoft rounded-2xl px-4 py-4 flex flex-col gap-2.5">
+          <span className="text-[11px] font-bold uppercase tracking-[.07em] text-faint2">Get ahead of it</span>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+            <DropInPicker date={date} candidates={candidates} />
+          </div>
+        </div>
+      )}
 
       <p className="m-0 text-center text-[13px] text-faint2">
         Tap any status to change it. Nothing else moves.
@@ -482,6 +549,7 @@ function FutureMode({
     time: string | null;
     status: AttendanceStatus | null;
     note: string | null;
+    isDropIn: boolean;
     openMakeup: { makeupId: number; missedDate: string } | null;
   }[];
   candidates: { id: number; name: string }[];
@@ -509,7 +577,12 @@ function FutureMode({
                 studentName={r.studentName}
                 time={r.time}
                 date={date}
-                right={<AwayStatusMenu attendanceId={r.attendanceId!} />}
+                right={
+                  <div className="flex items-center gap-2 flex-none">
+                    <AwayStatusMenu attendanceId={r.attendanceId!} />
+                    {r.isDropIn && <RemoveDropInButton attendanceId={r.attendanceId!} />}
+                  </div>
+                }
               >
                 <NoteField initialNote={r.note} onSave={saveNote} />
               </StudentAvatarRow>
@@ -525,9 +598,12 @@ function FutureMode({
                 date={date}
                 borderColor="#FFE1AC"
                 right={
-                  <span className="text-xs font-bold text-gold-text bg-gold-light rounded-full px-2.5 py-1">
-                    Makeup
-                  </span>
+                  <div className="flex items-center gap-2 flex-none">
+                    <span className="text-xs font-bold text-gold-text bg-gold-light rounded-full px-2.5 py-1">
+                      Makeup
+                    </span>
+                    {r.isDropIn && r.attendanceId && <RemoveDropInButton attendanceId={r.attendanceId} />}
+                  </div>
                 }
               >
                 <div className="flex items-center gap-2.5 bg-gold-soft rounded-2xl px-3.5 py-2.5">
@@ -544,7 +620,14 @@ function FutureMode({
             );
           }
           return (
-            <StudentAvatarRow key={r.studentId} studentId={r.studentId} studentName={r.studentName} time={r.time} date={date}>
+            <StudentAvatarRow
+              key={r.studentId}
+              studentId={r.studentId}
+              studentName={r.studentName}
+              time={r.time}
+              date={date}
+              right={r.isDropIn && r.attendanceId ? <RemoveDropInButton attendanceId={r.attendanceId} /> : undefined}
+            >
               <NoteField initialNote={r.note} onSave={saveNote} />
             </StudentAvatarRow>
           );

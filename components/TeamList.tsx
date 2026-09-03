@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { avatarColor, initials, levelColor } from "@/lib/colors";
 import { friendlyTime } from "@/lib/dates";
 import { Weekday } from "@/lib/types";
@@ -23,8 +24,29 @@ export default function TeamList({
   levels: Level[];
   todayWeekday: Weekday;
 }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState<number | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  function toggleSelectMode() {
+    setSelectMode((on) => !on);
+    setSelectedIds(new Set());
+  }
+
+  function toggleSelected(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function goToMessage() {
+    router.push(`/messages/new?ids=${Array.from(selectedIds).join(",")}`);
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -103,29 +125,63 @@ export default function TeamList({
         })}
       </div>
 
-      {todayList.length > 0 && (
-        <>
-          <span className="text-[11px] font-bold tracking-[.1em] uppercase text-faint2 px-0.5 pt-1">
-            Today
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <span className="text-[11px] font-bold tracking-[.1em] uppercase text-faint2 px-0.5">
+          {todayList.length > 0 ? "Today" : "All students"}
+        </span>
+        <button
+          type="button"
+          onClick={toggleSelectMode}
+          className="text-xs font-bold rounded-full px-3.5 py-1.5 cursor-pointer border-2"
+          style={{
+            background: selectMode ? "#241B2F" : "#FFFFFF",
+            color: selectMode ? "#FFFFFF" : "#5B5168",
+            borderColor: selectMode ? "#241B2F" : "#F3E6D8",
+          }}
+        >
+          {selectMode ? "Cancel" : "Select"}
+        </button>
+      </div>
+
+      {selectMode && (
+        <div className="flex items-center gap-2.5 bg-purple-light2 border-2 border-purple-border rounded-2xl px-3.5 py-2.5">
+          <span className="flex-1 text-[13px] font-bold text-purple-dark">
+            {selectedIds.size} selected
           </span>
-          <div className="flex flex-col gap-1.5">
-            {todayList.map(({ student, today }) => (
-              <Row
-                key={student.id}
-                student={student}
-                levelLabel={levelNameById.get(student.level_id ?? -1) ?? "No level"}
-                sublabel={`Today ${friendlyTime(today!.time)}`}
-                sublabelColor="#4A32C4"
-                highlight
-              />
-            ))}
-          </div>
-        </>
+          <button
+            type="button"
+            onClick={goToMessage}
+            disabled={selectedIds.size === 0}
+            className="text-[13px] font-bold rounded-full px-4 py-2 cursor-pointer border-none bg-purple text-white disabled:opacity-40 disabled:cursor-default"
+          >
+            Message
+          </button>
+        </div>
       )}
 
-      <span className="text-[11px] font-bold tracking-[.1em] uppercase text-faint2 px-0.5 pt-1">
-        {todayList.length > 0 ? "Everyone else" : "All students"}
-      </span>
+      {todayList.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {todayList.map(({ student, today }) => (
+            <Row
+              key={student.id}
+              student={student}
+              levelLabel={levelNameById.get(student.level_id ?? -1) ?? "No level"}
+              sublabel={`Today ${friendlyTime(today!.time)}`}
+              sublabelColor="#4A32C4"
+              highlight
+              selectMode={selectMode}
+              selected={selectedIds.has(student.id)}
+              onToggle={() => toggleSelected(student.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {todayList.length > 0 && (
+        <span className="text-[11px] font-bold tracking-[.1em] uppercase text-faint2 px-0.5 pt-1">
+          Everyone else
+        </span>
+      )}
       <div className="flex flex-col gap-1.5">
         {restList.map((student) => {
           const sched = student.student_schedules
@@ -137,6 +193,9 @@ export default function TeamList({
               student={student}
               levelLabel={levelNameById.get(student.level_id ?? -1) ?? "No level"}
               sublabel={sched || "No fixed schedule"}
+              selectMode={selectMode}
+              selected={selectedIds.has(student.id)}
+              onToggle={() => toggleSelected(student.id)}
             />
           );
         })}
@@ -155,21 +214,23 @@ function Row({
   sublabel,
   sublabelColor,
   highlight,
+  selectMode,
+  selected,
+  onToggle,
 }: {
   student: Student;
   levelLabel: string;
   sublabel: string;
   sublabelColor?: string;
   highlight?: boolean;
+  selectMode?: boolean;
+  selected?: boolean;
+  onToggle?: () => void;
 }) {
   const av = avatarColor(student.id);
   const lvl = levelColor(student.level_id);
-  return (
-    <Link
-      href={`/students/${student.id}?from=/team`}
-      className="no-underline text-inherit flex items-center gap-3 bg-white rounded-[18px] px-3.5 py-2.5 transition-colors"
-      style={{ border: `2px solid ${highlight ? "#DED4FF" : "#F3E6D8"}` }}
-    >
+  const content = (
+    <>
       <span
         className="w-[38px] h-[38px] rounded-full text-[13px] font-bold flex items-center justify-center flex-none"
         style={{ background: av.bg, color: av.fg }}
@@ -182,12 +243,42 @@ function Row({
           {sublabel}
         </span>
       </div>
-      <span
-        className="text-[11px] font-bold rounded-full px-2.5 py-1 flex-none"
-        style={{ background: lvl.bg, color: lvl.text }}
-      >
-        {levelLabel}
-      </span>
+      {selectMode ? (
+        <span
+          className="w-5 h-5 rounded-full border-2 flex-none flex items-center justify-center text-[11px] font-bold text-white"
+          style={{
+            background: selected ? "#6B4EFF" : "transparent",
+            borderColor: selected ? "#6B4EFF" : "#C9BFD4",
+          }}
+        >
+          {selected ? "✓" : ""}
+        </span>
+      ) : (
+        <span
+          className="text-[11px] font-bold rounded-full px-2.5 py-1 flex-none"
+          style={{ background: lvl.bg, color: lvl.text }}
+        >
+          {levelLabel}
+        </span>
+      )}
+    </>
+  );
+
+  const className =
+    "no-underline text-inherit flex items-center gap-3 bg-white rounded-[18px] px-3.5 py-2.5 transition-colors w-full text-left cursor-pointer";
+  const style = { border: `2px solid ${highlight ? "#DED4FF" : "#F3E6D8"}` };
+
+  if (selectMode) {
+    return (
+      <button type="button" onClick={onToggle} className={className} style={style}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={`/students/${student.id}?from=/team`} className={className} style={style}>
+      {content}
     </Link>
   );
 }

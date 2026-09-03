@@ -107,6 +107,17 @@ create trigger trg_sync_makeup
   for each row
   execute function sync_makeup_for_attendance();
 
+-- Holds only the most recently generated WhatsApp message batch -- a new
+-- batch overwrites this row outright rather than appending, so "the last
+-- message" always means exactly one thing and survives a page refresh.
+create table if not exists message_batches (
+  id          bigint primary key default 1 check (id = 1),
+  created_at  timestamptz not null default now(),
+  template    text not null,
+  source      text,
+  recipients  jsonb not null default '[]'::jsonb
+);
+
 create index if not exists idx_schedules_day on student_schedules(day);
 create index if not exists idx_schedules_student on student_schedules(student_id);
 create index if not exists idx_attendance_student on attendance(student_id);

@@ -5,6 +5,7 @@ import { getOpenMakeupsByStudent } from "@/lib/actions";
 import { friendlyDate, friendlyTime } from "@/lib/dates";
 import { avatarColor, initials, STATUS_STYLE } from "@/lib/colors";
 import { safeInternalPath } from "@/lib/nav";
+import { whatsAppLink } from "@/lib/whatsapp";
 import ArchiveButton from "@/components/ArchiveButton";
 import OwedProfilePill from "@/components/OwedProfilePill";
 import StudentLevelSection from "@/components/StudentLevelSection";
@@ -130,7 +131,7 @@ export default async function StudentProfilePage({
                       <PhoneIcon />
                     </a>
                     <a
-                      href={`https://wa.me/${toWhatsAppDigits(student.phone)}`}
+                      href={whatsAppLink(student.phone)}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Message ${student.parent || student.name} on WhatsApp`}
@@ -216,16 +217,6 @@ export default async function StudentProfilePage({
       </div>
     </div>
   );
-}
-
-// UK-shaped numbers ("07700 900000") are the common case here, so a leading
-// 0 is swapped for the UK country code -- wa.me needs digits with a country
-// code and no leading zero, unlike tel: which accepts the number as typed.
-function toWhatsAppDigits(phone: string): string {
-  const digits = phone.trim().replace(/[^\d+]/g, "");
-  if (digits.startsWith("+")) return digits.slice(1);
-  if (digits.startsWith("0")) return `44${digits.slice(1)}`;
-  return digits;
 }
 
 function PhoneIcon() {

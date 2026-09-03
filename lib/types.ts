@@ -77,3 +77,20 @@ export type Makeup = {
   resolved_at: string | null;
   resolved_note: string | null;
 };
+
+export type MessageRecipient = {
+  studentId: number;
+  name: string;
+  parent: string | null;
+  phone: string | null;
+  message: string;
+  sent: boolean;
+  sentAt: string | null;
+};
+
+export type MessageBatch = {
+  createdAt: string;
+  template: string;
+  source: string | null;
+  recipients: MessageRecipient[];
+};

@@ -85,3 +85,15 @@ export function friendlyShortDate(dateStr: string): string {
   const d = parseDateOnly(dateStr);
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
+
+// "Jun 9, 4:00 PM" -- from a full ISO timestamp (e.g. a DB `created_at`).
+// Locale is pinned explicitly (as every other formatter here does) so
+// server-rendered and client-hydrated output always agree.
+export function friendlyDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
