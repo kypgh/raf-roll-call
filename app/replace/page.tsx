@@ -22,7 +22,7 @@ export default async function ReplacePage() {
         <Link
           href={`/day/${todayString()}`}
           aria-label="Back"
-          className="no-underline w-9 h-9 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
+          className="no-underline w-9 h-9 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] border-2 border-[rgba(255,246,236,.4)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
         >
           ‹
         </Link>

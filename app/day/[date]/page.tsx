@@ -67,7 +67,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
         )}
         <Link
           href="/team"
-          className="flex items-center gap-2 no-underline bg-[rgba(255,246,236,.08)] border-[1.5px] border-[rgba(255,246,236,.16)] hover:bg-[rgba(255,246,236,.14)] rounded-full pl-2.5 pr-3.5 py-2 flex-none transition-colors"
+          className="flex items-center gap-2 no-underline bg-[rgba(255,246,236,.08)] border-2 border-[rgba(255,246,236,.4)] hover:bg-[rgba(255,246,236,.16)] rounded-full pl-2.5 pr-3.5 py-2 flex-none transition-colors"
         >
           <span className="flex">
             <span className="w-[22px] h-[22px] rounded-full bg-pink border-2 border-ink" />
@@ -79,7 +79,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
         <Link
           href="/history"
           aria-label="History"
-          className="flex items-center justify-center no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] border-[1.5px] border-[rgba(255,246,236,.16)] hover:bg-[rgba(255,246,236,.14)] flex-none transition-colors"
+          className="flex items-center justify-center no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] border-2 border-[rgba(255,246,236,.4)] hover:bg-[rgba(255,246,236,.16)] flex-none transition-colors"
         >
           <span className="relative w-[15px] h-[15px] rounded-full border-2 border-[#E4DDEC] flex-none">
             <span className="absolute left-1/2 top-1/2 w-[1.5px] h-[5px] bg-[#E4DDEC] rounded-full -translate-x-1/2 -translate-y-full origin-bottom" />
@@ -156,7 +156,7 @@ function StudentAvatarRow({
   studentId,
   studentName,
   time,
-  dimmed,
+  date,
   subtitle,
   subtitleColor,
   right,
@@ -166,7 +166,7 @@ function StudentAvatarRow({
   studentId: number;
   studentName: string;
   time: string | null;
-  dimmed?: boolean;
+  date?: string;
   subtitle?: string;
   subtitleColor?: string;
   right?: React.ReactNode;
@@ -178,18 +178,18 @@ function StudentAvatarRow({
     <div
       className="flex flex-col gap-2.5 rounded-[20px] px-4 py-4"
       style={{
-        background: dimmed ? "#FFFCF7" : "#FFFFFF",
-        border: `2px ${dimmed ? "dashed" : "solid"} ${borderColor ?? (dimmed ? "#E0D3C4" : "#F3E6D8")}`,
+        background: "#FFFFFF",
+        border: `2px solid ${borderColor ?? "#F3E6D8"}`,
       }}
     >
       <div className="flex items-center gap-3">
         <Link
-          href={`/students/${studentId}`}
+          href={date ? `/students/${studentId}?from=/day/${date}` : `/students/${studentId}`}
           className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
         >
           <span
             className="select-none w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
-            style={{ background: av.bg, color: av.fg, opacity: dimmed ? 0.5 : 1 }}
+            style={{ background: av.bg, color: av.fg }}
           >
             {initials(studentName)}
           </span>
@@ -197,9 +197,9 @@ function StudentAvatarRow({
             <span className="select-none text-[16px] font-bold truncate">{studentName}</span>
             <span
               className="select-none text-[12px] font-semibold"
-              style={{ color: subtitleColor ?? (dimmed ? "#A299AC" : "#7C7089") }}
+              style={{ color: subtitleColor ?? "#7C7089" }}
             >
-              {subtitle ?? (dimmed ? "Not marked" : time ? friendlyTime(time) : "Drop-in")}
+              {subtitle ?? (time ? friendlyTime(time) : "Drop-in")}
             </span>
           </div>
         </Link>
@@ -291,6 +291,7 @@ function TodayMode({
             studentId={r.studentId}
             studentName={r.studentName}
             time={r.time}
+            date={date}
             right={<span className="w-[30px] h-[30px] rounded-full border-2 border-dashed border-linedash flex-none" />}
           />
         ))}
@@ -351,29 +352,19 @@ function PartialMode({
       </Link>
 
       <div className="flex flex-col gap-2.5">
-        {rows.map((r) => {
-          const status = r.status;
-          return isAnswered(status) ? (
-            <DayStudentCard
-              key={r.studentId}
-              attendanceId={r.attendanceId!}
-              studentId={r.studentId}
-              studentName={r.studentName}
-              time={r.time}
-              status={status}
-              note={r.note}
-              isDropIn={r.isDropIn}
-            />
-          ) : (
-            <StudentAvatarRow
-              key={r.studentId}
-              studentId={r.studentId}
-              studentName={r.studentName}
-              time={r.time}
-              dimmed
-            />
-          );
-        })}
+        {rows.map((r) => (
+          <DayStudentCard
+            key={r.studentId}
+            date={date}
+            attendanceId={r.attendanceId}
+            studentId={r.studentId}
+            studentName={r.studentName}
+            time={r.time}
+            status={r.status}
+            note={r.note}
+            isDropIn={r.isDropIn}
+          />
+        ))}
       </div>
     </>
   );
@@ -411,6 +402,7 @@ function PastMode({
           return isAnswered(status) ? (
             <DayStudentCard
               key={r.studentId}
+              date={date}
               attendanceId={r.attendanceId!}
               studentId={r.studentId}
               studentName={r.studentName}
@@ -460,6 +452,7 @@ function TeacherOutMode({
             studentId={r.studentId}
             studentName={r.studentName}
             time={r.time}
+            date={date}
             subtitle={`${r.time ? friendlyTime(r.time) : "Drop-in"} · owed since ${friendlyShortDate(date)}`}
             subtitleColor="#8A5A00"
             right={<StatusDisc status="teacher_absent" size={30} />}
@@ -515,6 +508,7 @@ function FutureMode({
                 studentId={r.studentId}
                 studentName={r.studentName}
                 time={r.time}
+                date={date}
                 right={<AwayStatusMenu attendanceId={r.attendanceId!} />}
               >
                 <NoteField initialNote={r.note} onSave={saveNote} />
@@ -528,6 +522,7 @@ function FutureMode({
                 studentId={r.studentId}
                 studentName={r.studentName}
                 time={r.time}
+                date={date}
                 borderColor="#FFE1AC"
                 right={
                   <span className="text-xs font-bold text-gold-text bg-gold-light rounded-full px-2.5 py-1">
@@ -549,7 +544,7 @@ function FutureMode({
             );
           }
           return (
-            <StudentAvatarRow key={r.studentId} studentId={r.studentId} studentName={r.studentName} time={r.time}>
+            <StudentAvatarRow key={r.studentId} studentId={r.studentId} studentName={r.studentName} time={r.time} date={date}>
               <NoteField initialNote={r.note} onSave={saveNote} />
             </StudentAvatarRow>
           );

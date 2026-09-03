@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { getOpenMakeupsByStudent } from "@/lib/actions";
 import { friendlyDate, friendlyTime } from "@/lib/dates";
 import { avatarColor, initials, STATUS_STYLE } from "@/lib/colors";
+import { safeInternalPath } from "@/lib/nav";
 import ArchiveButton from "@/components/ArchiveButton";
 import OwedProfilePill from "@/components/OwedProfilePill";
 import StudentLevelSection from "@/components/StudentLevelSection";
@@ -12,10 +13,13 @@ export const dynamic = "force-dynamic";
 
 export default async function StudentProfilePage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams: { from?: string };
 }) {
   const id = Number(params.id);
+  const backHref = safeInternalPath(searchParams.from, "/team");
   const supabase = supabaseServer();
 
   // Only answered sessions count as history -- a drop-in added but never
@@ -57,14 +61,16 @@ export default async function StudentProfilePage({
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
         <Link
-          href="/team"
-          className="no-underline text-sm font-bold text-[#BBB0C6] hover:text-paper flex-1"
+          href={backHref}
+          aria-label="Back"
+          className="no-underline w-10 h-10 rounded-full bg-[rgba(107,78,255,.16)] hover:bg-[rgba(107,78,255,.26)] border-2 border-[rgba(107,78,255,.4)] flex items-center justify-center text-lg text-[#C9BBFF] flex-none transition-colors"
         >
-          ← Team
+          ‹
         </Link>
+        <span className="flex-1" />
         <Link
           href={`/students/${id}/edit`}
-          className="no-underline text-[13px] font-bold text-[#E4DDEC] bg-[rgba(255,246,236,.08)] border-[1.5px] border-[rgba(255,246,236,.16)] hover:bg-[rgba(255,246,236,.16)] rounded-full px-[15px] py-2.5 transition-colors flex-none"
+          className="no-underline text-[13px] font-bold text-[#E4DDEC] bg-[rgba(255,246,236,.08)] border-2 border-[rgba(255,246,236,.4)] hover:bg-[rgba(255,246,236,.16)] rounded-full px-[15px] py-2.5 transition-colors flex-none"
         >
           Edit details
         </Link>

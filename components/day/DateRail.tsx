@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { getRecentSessionDays, RailDay } from "@/lib/actions";
 import { addDays, parseDateOnly, todayString } from "@/lib/dates";
@@ -32,16 +32,19 @@ function Chip({
   isSelected,
   isFuture,
   stats,
+  chipRef,
 }: {
   date: string;
   isToday: boolean;
   isSelected: boolean;
   isFuture: boolean;
   stats: { present: number; away: number; out: number };
+  chipRef?: React.Ref<HTMLAnchorElement>;
 }) {
   const emphasized = isToday || isSelected;
   return (
     <Link
+      ref={chipRef}
       href={`/day/${date}`}
       className="no-underline flex md:flex-col flex-row items-center justify-center gap-1 flex-none rounded-2xl px-3 py-2.5 md:py-3 transition-transform hover:-translate-y-0.5"
       style={{
@@ -83,8 +86,13 @@ export default function DateRail({
   const [past, setPast] = useState<RailDay[]>(initialPast);
   const [exhausted, setExhausted] = useState(initialPast.length < 14);
   const [isPending, startTransition] = useTransition();
+  const selectedRef = useRef<HTMLAnchorElement>(null);
 
   const future = Array.from({ length: 14 }, (_, i) => addDays(today, i + 1));
+
+  useEffect(() => {
+    selectedRef.current?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [current]);
 
   function loadMore() {
     const oldest = past.length > 0 ? past[past.length - 1].date : today;
@@ -117,6 +125,7 @@ export default function DateRail({
           isSelected={d.date === current}
           isFuture={false}
           stats={d}
+          chipRef={d.date === current ? selectedRef : undefined}
         />
       ))}
       <Chip
@@ -125,6 +134,7 @@ export default function DateRail({
         isSelected={current === today}
         isFuture={false}
         stats={todayStats}
+        chipRef={today === current ? selectedRef : undefined}
       />
       {future.map((date) => (
         <Chip
@@ -134,6 +144,7 @@ export default function DateRail({
           isSelected={date === current}
           isFuture={true}
           stats={{ present: 0, away: 0, out: 0 }}
+          chipRef={date === current ? selectedRef : undefined}
         />
       ))}
     </div>

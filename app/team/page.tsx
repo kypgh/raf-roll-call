@@ -2,6 +2,7 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase";
 import { todayString, weekdayOf } from "@/lib/dates";
 import TeamList from "@/components/TeamList";
+import ExportTeamButton from "@/components/ExportTeamButton";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default async function TeamPage() {
   const [{ data: students }, { data: levels }] = await Promise.all([
     supabase
       .from("students")
-      .select("id, name, level_id, student_schedules(day, time)")
+      .select("id, name, level_id, parent, phone, age, notes, student_schedules(day, time)")
       .eq("archived", false)
       .order("name", { ascending: true }),
     supabase.from("levels").select("id, name").order("sort_order", { ascending: true }),
@@ -23,9 +24,10 @@ export default async function TeamPage() {
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
         <span className="select-none font-display font-semibold text-xl text-paper flex-1">Team</span>
+        <ExportTeamButton students={students ?? []} levels={levels ?? []} />
         <Link
           href={`/day/${today}`}
-          className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
+          className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] border-2 border-[rgba(255,246,236,.4)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
         >
           ✕
         </Link>

@@ -102,7 +102,7 @@ export default function RegisterDeck({
           <span className="text-sm font-bold text-white flex-none">{positionLabel}</span>
           <Link
             href={`/day/${date}`}
-            className="no-underline w-8 h-8 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[13px] text-[#BBB0C6] flex-none transition-colors"
+            className="no-underline w-8 h-8 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] border-2 border-[rgba(255,246,236,.4)] flex items-center justify-center text-[13px] text-[#BBB0C6] flex-none transition-colors"
             aria-label="Close register"
           >
             ✕

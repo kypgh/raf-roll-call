@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { updateAttendance } from "@/lib/actions";
+import { answerAttendance, setNoteForDay, updateAttendance } from "@/lib/actions";
 import { AttendanceStatus } from "@/lib/types";
 import { avatarColor, initials } from "@/lib/colors";
 import { friendlyTime } from "@/lib/dates";
@@ -16,6 +16,7 @@ const EDIT_OPTIONS: { status: AttendanceStatus; label: string; border: string; o
 ];
 
 export default function DayStudentCard({
+  date,
   attendanceId,
   studentId,
   studentName,
@@ -24,15 +25,17 @@ export default function DayStudentCard({
   note,
   isDropIn,
 }: {
-  attendanceId: number;
+  date: string;
+  attendanceId: number | null;
   studentId: number;
   studentName: string;
   time: string | null;
-  status: AttendanceStatus;
+  status: AttendanceStatus | null;
   note: string | null;
   isDropIn: boolean;
 }) {
   const [current, setCurrent] = useState(status);
+  const [id, setId] = useState(attendanceId);
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const av = avatarColor(studentId);
@@ -41,7 +44,20 @@ export default function DayStudentCard({
     setCurrent(next);
     setOpen(false);
     startTransition(async () => {
-      await updateAttendance(attendanceId, { status: next });
+      if (id) {
+        await updateAttendance(id, { status: next });
+      } else {
+        const res = await answerAttendance(date, studentId, next);
+        if (res.ok) setId(res.attendanceId);
+      }
+    });
+  }
+
+  function saveNote(next: string) {
+    if (id) return updateAttendance(id, { note: next || null });
+    return setNoteForDay(date, studentId, next).then((res) => {
+      if (res.ok) setId(res.attendanceId);
+      return res;
     });
   }
 
@@ -52,7 +68,7 @@ export default function DayStudentCard({
     >
       <div className="flex items-center gap-3">
         <Link
-          href={`/students/${studentId}`}
+          href={`/students/${studentId}?from=/day/${date}`}
           className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
         >
           <span
@@ -71,10 +87,7 @@ export default function DayStudentCard({
         <StatusDisc status={current} onClick={() => setOpen((o) => !o)} />
       </div>
 
-      <NoteField
-        initialNote={note}
-        onSave={(next) => updateAttendance(attendanceId, { note: next || null })}
-      />
+      <NoteField initialNote={note} onSave={saveNote} />
 
       {open && (
         <div className="flex flex-col gap-2.5 pt-3" style={{ borderTop: "2px solid #F6EFE6" }}>

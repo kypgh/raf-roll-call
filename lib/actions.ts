@@ -701,3 +701,55 @@ export async function getRecentSessionDays(
     ...(countsBySession.get(s.id) ?? { present: 0, away: 0, out: 0 }),
   }));
 }
+
+export type HistoryExportRow = {
+  date: string;
+  studentName: string;
+  status: AttendanceStatus;
+  note: string | null;
+};
+
+// Unbounded on purpose -- unlike the History page (which pages 20 sessions
+// at a time), export means "everything", not just what's been scrolled into
+// view.
+export async function getFullHistoryExport(): Promise<HistoryExportRow[]> {
+  const supabase = supabaseServer();
+  const { data: sessions } = await supabase
+    .from("sessions")
+    .select("id, date")
+    .order("date", { ascending: false });
+
+  const sessionIds = (sessions ?? []).map((s) => s.id);
+  const { data: attendance } =
+    sessionIds.length > 0
+      ? await supabase
+          .from("attendance")
+          .select("session_id, status, note, students(name)")
+          .in("session_id", sessionIds)
+          .not("status", "is", null)
+      : { data: [] as any[] };
+
+  const dateBySession = new Map((sessions ?? []).map((s) => [s.id, s.date]));
+  const bySession = new Map<number, any[]>();
+  for (const row of (attendance ?? []) as any[]) {
+    const list = bySession.get(row.session_id) ?? [];
+    list.push(row);
+    bySession.set(row.session_id, list);
+  }
+  for (const list of bySession.values()) {
+    list.sort((a, b) => (a.students?.name ?? "").localeCompare(b.students?.name ?? ""));
+  }
+
+  const rows: HistoryExportRow[] = [];
+  for (const s of sessions ?? []) {
+    for (const a of bySession.get(s.id) ?? []) {
+      rows.push({
+        date: dateBySession.get(s.id) ?? "",
+        studentName: a.students?.name ?? "Unknown",
+        status: a.status,
+        note: a.note,
+      });
+    }
+  }
+  return rows;
+}

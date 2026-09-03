@@ -166,7 +166,7 @@ function Row({
   const lvl = levelColor(student.level_id);
   return (
     <Link
-      href={`/students/${student.id}`}
+      href={`/students/${student.id}?from=/team`}
       className="no-underline text-inherit flex items-center gap-3 bg-white rounded-[18px] px-3.5 py-2.5 transition-colors"
       style={{ border: `2px solid ${highlight ? "#DED4FF" : "#F3E6D8"}` }}
     >

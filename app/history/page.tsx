@@ -2,6 +2,7 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase";
 import { friendlyDate, todayString } from "@/lib/dates";
 import { STATUS_STYLE } from "@/lib/colors";
+import ExportHistoryButton from "@/components/ExportHistoryButton";
 
 export const dynamic = "force-dynamic";
 
@@ -52,10 +53,11 @@ export default async function HistoryPage({
     <div className="bg-ink min-h-screen flex flex-col">
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] pb-3.5 flex-none">
         <span className="select-none font-display font-semibold text-xl text-paper flex-1">History</span>
+        <ExportHistoryButton />
         <Link
           href={`/day/${today}`}
           aria-label="Close"
-          className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
+          className="no-underline w-10 h-10 rounded-full bg-[rgba(255,246,236,.08)] hover:bg-[rgba(255,246,236,.16)] border-2 border-[rgba(255,246,236,.4)] flex items-center justify-center text-[15px] text-[#BBB0C6] flex-none transition-colors"
         >
           ✕
         </Link>
