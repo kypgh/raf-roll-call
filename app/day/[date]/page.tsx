@@ -21,6 +21,7 @@ import { ImOutTodayButton, WasntOutAfterAllButton } from "@/components/day/Teach
 import DropInPicker from "@/components/day/DropInPicker";
 import MarkAwayPicker from "@/components/day/MarkAwayPicker";
 import RemoveDropInButton from "@/components/day/RemoveDropInButton";
+import ResumeToToday from "@/components/day/ResumeToToday";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
 
   return (
     <div className="bg-ink min-h-screen md:h-screen flex flex-col md:overflow-hidden">
+      <ResumeToToday date={dateStr} />
       <div className="flex items-center gap-2.5 px-[18px] md:px-7 pt-[18px] md:pt-6 pb-3 flex-none">
         <img
           src="/icons/icon-192.png"
@@ -275,6 +277,8 @@ function TodayMode({
     studentId: number;
     studentName: string;
     time: string | null;
+    status: AttendanceStatus | null;
+    note: string | null;
     isDropIn: boolean;
   }[];
   candidates: { id: number; name: string }[];
@@ -312,19 +316,16 @@ function TodayMode({
 
       <div className="flex flex-col gap-2.5">
         {rows.map((r) => (
-          <StudentAvatarRow
+          <DayStudentCard
             key={r.studentId}
+            date={date}
+            attendanceId={r.attendanceId}
             studentId={r.studentId}
             studentName={r.studentName}
             time={r.time}
-            date={date}
-            right={
-              r.isDropIn && r.attendanceId ? (
-                <RemoveDropInButton attendanceId={r.attendanceId} />
-              ) : (
-                <span className="w-[30px] h-[30px] rounded-full border-2 border-dashed border-linedash flex-none" />
-              )
-            }
+            status={r.status}
+            note={r.note}
+            isDropIn={r.isDropIn}
           />
         ))}
       </div>
