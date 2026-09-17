@@ -2,13 +2,16 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { answerAttendance, setNoteForDay, updateAttendance } from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { answerAttendance, removeAttendance, setNoteForDay, updateAttendance } from "@/lib/actions";
 import { AttendanceStatus } from "@/lib/types";
 import { avatarColor, initials } from "@/lib/colors";
 import { friendlyTime } from "@/lib/dates";
+import { useLongPress } from "@/lib/useLongPress";
 import StatusDisc from "./StatusDisc";
 import NoteField from "@/components/NoteField";
 import RemoveDropInButton from "./RemoveDropInButton";
+import DeleteSessionModal from "./DeleteSessionModal";
 
 const EDIT_OPTIONS: { status: AttendanceStatus; label: string; border: string; on: string; onFg: string }[] = [
   { status: "present", label: "Present", border: "#CBEEDC", on: "#17C26B", onFg: "#FFFFFF" },
@@ -38,8 +41,23 @@ export default function DayStudentCard({
   const [current, setCurrent] = useState(status);
   const [id, setId] = useState(attendanceId);
   const [open, setOpen] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDeleteTransition] = useTransition();
+  const router = useRouter();
   const av = avatarColor(studentId);
+
+  // Nothing to delete until a real attendance row exists.
+  const longPress = useLongPress(() => setConfirmingDelete(true), !id);
+
+  function confirmDelete() {
+    if (!id) return;
+    startDeleteTransition(async () => {
+      await removeAttendance(id);
+      setConfirmingDelete(false);
+      router.refresh();
+    });
+  }
 
   function pick(next: AttendanceStatus) {
     setCurrent(next);
@@ -63,61 +81,74 @@ export default function DayStudentCard({
   }
 
   return (
-    <div
-      className="bg-white rounded-[20px] px-4 py-4 flex flex-col gap-3 transition-colors"
-      style={{ border: `2px solid ${open ? "#6B4EFF" : "#F3E6D8"}` }}
-    >
-      <div className="flex items-center gap-3">
-        <Link
-          href={`/students/${studentId}?from=/day/${date}`}
-          className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
-        >
-          <span
-            className="select-none w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
-            style={{ background: av.bg, color: av.fg }}
+    <>
+      <div
+        className="bg-white rounded-[20px] px-4 py-4 flex flex-col gap-3 transition-colors select-none"
+        style={{ border: `2px solid ${open ? "#6B4EFF" : "#F3E6D8"}`, WebkitTouchCallout: "none" }}
+        {...longPress}
+      >
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/students/${studentId}?from=/day/${date}`}
+            className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
           >
-            {initials(studentName)}
-          </span>
-          <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-            <span className="select-none text-[16px] font-bold truncate">{studentName}</span>
-            <span className="select-none text-[12px] font-semibold text-muted">
-              {isDropIn ? "Drop-in" : friendlyTime(time)}
+            <span
+              className="select-none w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
+              style={{ background: av.bg, color: av.fg }}
+            >
+              {initials(studentName)}
             </span>
+            <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+              <span className="select-none text-[16px] font-bold truncate">{studentName}</span>
+              <span className="select-none text-[12px] font-semibold text-muted">
+                {isDropIn ? "Drop-in" : friendlyTime(time)}
+              </span>
+            </div>
+          </Link>
+          <StatusDisc status={current} onClick={() => setOpen((o) => !o)} />
+          {isDropIn && id && <RemoveDropInButton attendanceId={id} />}
+        </div>
+
+        <NoteField initialNote={note} onSave={saveNote} />
+
+        {open && (
+          <div className="flex flex-col gap-2.5 pt-3" style={{ borderTop: "2px solid #F6EFE6" }}>
+            <span className="text-[11px] font-bold uppercase tracking-[.07em] text-faint2">
+              Change what happened
+            </span>
+            <div className="flex gap-2">
+              {EDIT_OPTIONS.map((o) => {
+                const on = current === o.status;
+                return (
+                  <button
+                    key={o.status}
+                    onClick={() => pick(o.status)}
+                    disabled={isPending}
+                    className="flex-1 min-h-[42px] rounded-[13px] font-body text-[13px] font-bold cursor-pointer transition-transform active:translate-y-0.5"
+                    style={{
+                      border: `2px solid ${o.border}`,
+                      background: on ? o.on : "#FFFFFF",
+                      color: on ? o.onFg : "#5B5168",
+                    }}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </Link>
-        <StatusDisc status={current} onClick={() => setOpen((o) => !o)} />
-        {isDropIn && id && <RemoveDropInButton attendanceId={id} />}
+        )}
       </div>
 
-      <NoteField initialNote={note} onSave={saveNote} />
-
-      {open && (
-        <div className="flex flex-col gap-2.5 pt-3" style={{ borderTop: "2px solid #F6EFE6" }}>
-          <span className="text-[11px] font-bold uppercase tracking-[.07em] text-faint2">
-            Change what happened
-          </span>
-          <div className="flex gap-2">
-            {EDIT_OPTIONS.map((o) => {
-              const on = current === o.status;
-              return (
-                <button
-                  key={o.status}
-                  onClick={() => pick(o.status)}
-                  disabled={isPending}
-                  className="flex-1 min-h-[42px] rounded-[13px] font-body text-[13px] font-bold cursor-pointer transition-transform active:translate-y-0.5"
-                  style={{
-                    border: `2px solid ${o.border}`,
-                    background: on ? o.on : "#FFFFFF",
-                    color: on ? o.onFg : "#5B5168",
-                  }}
-                >
-                  {o.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      {confirmingDelete && (
+        <DeleteSessionModal
+          title="Delete this session?"
+          description={`${studentName} — ${isDropIn ? "Drop-in" : friendlyTime(time)}. This can't be undone.`}
+          isPending={isDeleting}
+          onCancel={() => setConfirmingDelete(false)}
+          onConfirm={confirmDelete}
+        />
       )}
-    </div>
+    </>
   );
 }

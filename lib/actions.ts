@@ -275,6 +275,24 @@ export async function answerAttendance(
   return { ok: true, attendanceId: data.id, sessionId: session.id };
 }
 
+// A note on the day itself, not tied to any one student -- "hall was
+// closed", "sub taught today", "everyone was wired, it rained all day".
+// Stored on the session's own `label` column, separate from any student's
+// per-session `note`.
+export async function setDayNote(dateStr: string, note: string) {
+  const supabase = supabaseServer();
+  const session = await ensureSessionForDate(dateStr);
+
+  const { error } = await supabase
+    .from("sessions")
+    .update({ label: note || null })
+    .eq("id", session.id);
+
+  if (error) return { ok: false, error: error.message };
+  revalidateAll();
+  return { ok: true };
+}
+
 // Sets a note without deciding a status -- e.g. jotting something down on a
 // future lesson before it happens. Deliberately omits `status` from the
 // upsert payload (rather than passing `status: null`) so an existing row's
@@ -506,6 +524,7 @@ export type DayStudentRow = {
 export type DaySheetData = {
   date: string;
   sessionId: number | null;
+  note: string | null;
   mode: DayMode;
   rows: DayStudentRow[];
   present: number;
@@ -522,7 +541,7 @@ export async function loadDaySheet(dateStr: string): Promise<DaySheetData> {
   const weekday = weekdayOf(dateStr);
 
   const [{ data: session }, { data: schedules }] = await Promise.all([
-    supabase.from("sessions").select("id").eq("date", dateStr).maybeSingle(),
+    supabase.from("sessions").select("id, label").eq("date", dateStr).maybeSingle(),
     supabase
       .from("student_schedules")
       .select("student_id, time, students!inner(id, name, archived)")
@@ -607,6 +626,7 @@ export async function loadDaySheet(dateStr: string): Promise<DaySheetData> {
   return {
     date: dateStr,
     sessionId: session?.id ?? null,
+    note: session?.label ?? null,
     mode,
     rows,
     present,

@@ -9,10 +9,10 @@ import {
   relativeDayLabel,
   todayString,
 } from "@/lib/dates";
-import { avatarColor, initials } from "@/lib/colors";
 import { isAnswered, AttendanceStatus } from "@/lib/types";
 import DateRail from "@/components/day/DateRail";
 import DayStudentCard from "@/components/day/DayStudentCard";
+import SessionAvatarRow from "@/components/day/SessionAvatarRow";
 import StatTiles from "@/components/day/StatTiles";
 import StatusDisc from "@/components/day/StatusDisc";
 import AwayStatusMenu from "@/components/day/AwayStatusMenu";
@@ -22,6 +22,7 @@ import DropInPicker from "@/components/day/DropInPicker";
 import MarkAwayPicker from "@/components/day/MarkAwayPicker";
 import RemoveDropInButton from "@/components/day/RemoveDropInButton";
 import ResumeToToday from "@/components/day/ResumeToToday";
+import DayNoteToggle from "@/components/day/DayNoteToggle";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
@@ -110,11 +111,14 @@ export default async function DayPage({ params }: { params: { date: string } }) 
 
         <div className="flex-1 md:h-full md:overflow-y-auto bg-paper rounded-t-[32px] px-[18px] md:px-7 pt-6 pb-16">
           <div className="max-w-[640px] mx-auto flex flex-col gap-4">
-            {day.mode === "empty" && <EmptyMode date={dateStr} candidates={dropInCandidates} />}
+            {day.mode === "empty" && (
+              <EmptyMode date={dateStr} note={day.note} candidates={dropInCandidates} />
+            )}
             {day.mode === "today" && (
               <TodayMode
                 date={dateStr}
                 isToday={dateStr === today}
+                note={day.note}
                 total={day.total}
                 timeRange={timeRange}
                 rows={day.rows}
@@ -125,6 +129,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
               <PartialMode
                 date={dateStr}
                 isToday={dateStr === today}
+                note={day.note}
                 answeredCount={day.answeredCount}
                 total={day.total}
                 rows={day.rows}
@@ -138,6 +143,7 @@ export default async function DayPage({ params }: { params: { date: string } }) 
             {day.mode === "future" && (
               <FutureMode
                 date={dateStr}
+                note={day.note}
                 rows={day.rows}
                 candidates={dropInCandidates}
               />
@@ -174,77 +180,23 @@ function Pill({ children, tone }: { children: React.ReactNode; tone: "today" | "
   );
 }
 
-function StudentAvatarRow({
-  studentId,
-  studentName,
-  time,
-  date,
-  subtitle,
-  subtitleColor,
-  right,
-  borderColor,
-  children,
-}: {
-  studentId: number;
-  studentName: string;
-  time: string | null;
-  date?: string;
-  subtitle?: string;
-  subtitleColor?: string;
-  right?: React.ReactNode;
-  borderColor?: string;
-  children?: React.ReactNode;
-}) {
-  const av = avatarColor(studentId);
-  return (
-    <div
-      className="flex flex-col gap-2.5 rounded-[20px] px-4 py-4"
-      style={{
-        background: "#FFFFFF",
-        border: `2px solid ${borderColor ?? "#F3E6D8"}`,
-      }}
-    >
-      <div className="flex items-center gap-3">
-        <Link
-          href={date ? `/students/${studentId}?from=/day/${date}` : `/students/${studentId}`}
-          className="no-underline text-inherit flex items-center gap-3 flex-1 min-w-0"
-        >
-          <span
-            className="select-none w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center flex-none"
-            style={{ background: av.bg, color: av.fg }}
-          >
-            {initials(studentName)}
-          </span>
-          <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-            <span className="select-none text-[16px] font-bold truncate">{studentName}</span>
-            <span
-              className="select-none text-[12px] font-semibold"
-              style={{ color: subtitleColor ?? "#7C7089" }}
-            >
-              {subtitle ?? (time ? friendlyTime(time) : "Drop-in")}
-            </span>
-          </div>
-        </Link>
-        {right}
-      </div>
-      {children}
-    </div>
-  );
-}
-
 // ---------- empty ----------
 
 function EmptyMode({
   date,
+  note,
   candidates,
 }: {
   date: string;
+  note: string | null;
   candidates: { id: number; name: string }[];
 }) {
   return (
     <>
       <div className="flex flex-col gap-1">
-        <Title>{friendlyDate(date)}</Title>
+        <DayNoteToggle date={date} initialNote={note}>
+          <Title>{friendlyDate(date)}</Title>
+        </DayNoteToggle>
         <p className="m-0 text-sm text-muted">Nothing scheduled today.</p>
       </div>
       <div className="border-2 border-dashed border-linesoft rounded-[26px] px-6 py-10 flex flex-col items-center gap-2 text-center">
@@ -263,6 +215,7 @@ function EmptyMode({
 function TodayMode({
   date,
   isToday,
+  note,
   total,
   timeRange,
   rows,
@@ -270,6 +223,7 @@ function TodayMode({
 }: {
   date: string;
   isToday: boolean;
+  note: string | null;
   total: number;
   timeRange: string | null;
   rows: {
@@ -287,7 +241,9 @@ function TodayMode({
   return (
     <>
       <div className="flex flex-col gap-1.5">
-        <Title>{friendlyDate(date)}</Title>
+        <DayNoteToggle date={date} initialNote={note}>
+          <Title>{friendlyDate(date)}</Title>
+        </DayNoteToggle>
         <p className="m-0 text-sm text-muted">
           {total} {total === 1 ? "lesson" : "lessons"}
           {timeRange ? ` · ${timeRange}` : ""} · none marked yet
@@ -346,6 +302,7 @@ function TodayMode({
 function PartialMode({
   date,
   isToday,
+  note,
   answeredCount,
   total,
   rows,
@@ -353,6 +310,7 @@ function PartialMode({
 }: {
   date: string;
   isToday: boolean;
+  note: string | null;
   answeredCount: number;
   total: number;
   rows: {
@@ -370,7 +328,9 @@ function PartialMode({
   return (
     <>
       <div className="flex flex-col gap-1">
-        <Title>{friendlyDate(date)}</Title>
+        <DayNoteToggle date={date} initialNote={note}>
+          <Title>{friendlyDate(date)}</Title>
+        </DayNoteToggle>
         <p className="m-0 text-sm text-muted">
           {answeredCount} of {total} marked · you left in a hurry
         </p>
@@ -435,7 +395,9 @@ function PastMode({
   return (
     <>
       <div className="flex flex-col gap-1">
-        <Title>{friendlyDate(date)}</Title>
+        <DayNoteToggle date={date} initialNote={day.note}>
+          <Title>{friendlyDate(date)}</Title>
+        </DayNoteToggle>
         <p className="m-0 text-sm text-muted">
           Registered {relativeDayLabel(date).toLowerCase()}
           {day.out > 0 ? ` · ${day.out} lesson${day.out === 1 ? "" : "s"} owed` : ""}
@@ -496,8 +458,10 @@ function TeacherOutMode({
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <Title>{friendlyDate(date)}</Title>
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <DayNoteToggle date={date} initialNote={day.note}>
+            <Title>{friendlyDate(date)}</Title>
+          </DayNoteToggle>
           <p className="m-0 text-sm text-muted">
             You were out · {day.total} {day.total === 1 ? "lesson" : "lessons"} to replace
           </p>
@@ -509,12 +473,13 @@ function TeacherOutMode({
 
       <div className="flex flex-col gap-2.5">
         {day.rows.map((r) => (
-          <StudentAvatarRow
+          <SessionAvatarRow
             key={r.studentId}
             studentId={r.studentId}
             studentName={r.studentName}
             time={r.time}
             date={date}
+            attendanceId={r.attendanceId}
             subtitle={`${r.time ? friendlyTime(r.time) : "Drop-in"} · owed since ${friendlyShortDate(date)}`}
             subtitleColor="#8A5A00"
             right={<StatusDisc status="teacher_absent" size={30} />}
@@ -533,10 +498,12 @@ function TeacherOutMode({
 
 function FutureMode({
   date,
+  note,
   rows,
   candidates,
 }: {
   date: string;
+  note: string | null;
   rows: {
     attendanceId: number | null;
     studentId: number;
@@ -553,7 +520,9 @@ function FutureMode({
   return (
     <>
       <div className="flex flex-col gap-1">
-        <Title>{friendlyDate(date)}</Title>
+        <DayNoteToggle date={date} initialNote={note}>
+          <Title>{friendlyDate(date)}</Title>
+        </DayNoteToggle>
         <p className="m-0 text-sm text-muted">
           {relativeDayLabel(date)} · {rows.length} {rows.length === 1 ? "lesson" : "lessons"} booked
         </p>
@@ -566,12 +535,13 @@ function FutureMode({
 
           if (r.status === "absent") {
             return (
-              <StudentAvatarRow
+              <SessionAvatarRow
                 key={r.studentId}
                 studentId={r.studentId}
                 studentName={r.studentName}
                 time={r.time}
                 date={date}
+                attendanceId={r.attendanceId}
                 right={
                   <div className="flex items-center gap-2 flex-none">
                     <AwayStatusMenu attendanceId={r.attendanceId!} />
@@ -580,17 +550,18 @@ function FutureMode({
                 }
               >
                 <NoteField initialNote={r.note} onSave={saveNote} />
-              </StudentAvatarRow>
+              </SessionAvatarRow>
             );
           }
           if (r.openMakeup) {
             return (
-              <StudentAvatarRow
+              <SessionAvatarRow
                 key={r.studentId}
                 studentId={r.studentId}
                 studentName={r.studentName}
                 time={r.time}
                 date={date}
+                attendanceId={r.attendanceId}
                 borderColor="#FFE1AC"
                 right={
                   <div className="flex items-center gap-2 flex-none">
@@ -611,20 +582,21 @@ function FutureMode({
                   </span>
                 </div>
                 <NoteField initialNote={r.note} onSave={saveNote} />
-              </StudentAvatarRow>
+              </SessionAvatarRow>
             );
           }
           return (
-            <StudentAvatarRow
+            <SessionAvatarRow
               key={r.studentId}
               studentId={r.studentId}
               studentName={r.studentName}
               time={r.time}
               date={date}
+              attendanceId={r.attendanceId}
               right={r.isDropIn && r.attendanceId ? <RemoveDropInButton attendanceId={r.attendanceId} /> : undefined}
             >
               <NoteField initialNote={r.note} onSave={saveNote} />
-            </StudentAvatarRow>
+            </SessionAvatarRow>
           );
         })}
       </div>
